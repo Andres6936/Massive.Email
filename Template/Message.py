@@ -19,6 +19,7 @@ def GetMessageTemplate(client: Sheet):
                 
                 <p>
                     {client.Name}<br />
+                    NIT.: <br />
                     {client.Identification}<br />
                     {client.ContactPerson}<br />
                     {client.Address}<br />
@@ -39,12 +40,14 @@ def GetMessageTemplate(client: Sheet):
                 
                 <p>&nbsp;</p>
                 
-                <p>En atenci&oacute;n a nuestra comunicaci&oacute;n previa y su voluntad de continuidad con los servicios prestados a Usted(es) antes con AMBIENTALES NACIONALES SAS y ahora con RESIDUOS AMBIENTALES SAS; le da la bienvenida a nuestra compa&ntilde;&iacute;a, as&iacute; mismo, se adjuntan los siguientes documentos:</p>
+                <p>En atenci&oacute;n a nuestra comunicaci&oacute;n previa y su voluntad de continuidad con los servicios 
+                prestados a Usted(es) antes con AMBIENTALES NACIONALES SAS y ahora con <strong>RESIDUOS AMBIENTALES SAS</strong>;
+                le da la bienvenida a nuestra compa&ntilde;&iacute;a, as&iacute; mismo, se adjuntan los siguientes documentos:</p>
                 
                 <p>&nbsp;</p>
                 
                 <ol>
-                    <li>Contrato de Transporte Integral de Residuos &ndash; DEVOLVER FIRMADO</li>
+                    <li>Contrato de Transporte Integral de Residuos &ndash; <strong>POR FAVOR DEVOLVER FIRMADO</strong></li>
                     <li>Protocolo de Recolecci&oacute;n &ndash; Tips importantes para el GENERADOR.</li>
                     <li>RAD de Plan de Contingencia SECRETARIA DE AMBIENTE Y CAR</li>
                     <li>Licencia Ambiental Aliados (Prosarc y Ecoentorno)</li>
@@ -79,14 +82,26 @@ def GetMessageTemplate(client: Sheet):
 """
 
 
+# Used for store the file in cache and avoid unnecessary I/O
+cache = {}
+
+
 def AddAttachmentGeneral(mimeMessage: EmailMessage):
     for file in glob.glob('Attachment/General/*'):
         # guessing the MIME type
         type_subtype, _ = mimetypes.guess_type(file)
         maintype, subtype = type_subtype.split('/')
 
-        with open(file, 'rb') as fp:
-            attachment_data = fp.read()
+        if cache.get(file) is None:
+            with open(file, 'rb') as fp:
+                attachment_data = fp.read()
+                mimeMessage.add_attachment(
+                    attachment_data, maintype, subtype,
+                    filename=os.path.basename(fp.name))
+                # Added the buffer to cache
+                cache[file] = attachment_data
+        else:
+            # Using the cache of general file
             mimeMessage.add_attachment(
-                attachment_data, maintype, subtype,
+                cache.get(file), maintype, subtype,
                 filename=os.path.basename(fp.name))
