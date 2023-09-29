@@ -21,10 +21,15 @@ from googleapiclient.errors import HttpError
 from Entity.Client import Client
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send',
+    'https://www.googleapis.com/auth/gmail.compose',
+    'https://www.googleapis.com/auth/gmail.insert'
+]
 
 
-def GmailCreateDraftWithAttachment():
+def GmailCreateDraftWithAttachment(credentials):
     """Create and insert a draft email with attachment.
        Print the returned draft's message and id.
       Returns: Draft object, including draft id and message meta data.
@@ -33,16 +38,15 @@ def GmailCreateDraftWithAttachment():
       TODO(developer) - See https://developers.google.com/identity
       for guides on implementing OAuth2 for the application.
     """
-    creds, _ = google.auth.default()
 
     try:
         # create gmail api client
-        service = build('gmail', 'v1', credentials=creds)
+        service = build('gmail', 'v1', credentials=credentials)
         mime_message = EmailMessage()
 
         # headers
-        mime_message['To'] = 'gduser1@workspacesamples.dev'
-        mime_message['From'] = 'gduser2@workspacesamples.dev'
+        mime_message['To'] = 'residuosambientalessas@gmail.com'
+        mime_message['From'] = 'residuosambientalessas@gmail.com'
         mime_message['Subject'] = 'sample with attachment'
 
         # text
@@ -52,7 +56,7 @@ def GmailCreateDraftWithAttachment():
         )
 
         # attachment
-        attachment_filename = 'photo.jpg'
+        attachment_filename = 'DSC_4966.jpg'
         # guessing the MIME type
         type_subtype, _ = mimetypes.guess_type(attachment_filename)
         maintype, subtype = type_subtype.split('/')
@@ -145,6 +149,8 @@ def main():
         print('Labels:')
         for label in labels:
             print(label['name'])
+
+        GmailCreateDraftWithAttachment(creds)
 
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
