@@ -1,5 +1,6 @@
 import glob
 import mimetypes
+import os.path
 from email.message import EmailMessage
 
 
@@ -78,4 +79,6 @@ def AddAttachmentGeneral(mimeMessage: EmailMessage):
 
         with open(file, 'rb') as fp:
             attachment_data = fp.read()
-        mimeMessage.add_attachment(attachment_data, maintype, subtype)
+            mimeMessage.add_attachment(
+                attachment_data, maintype, subtype,
+                filename=os.path.basename(fp.name))
