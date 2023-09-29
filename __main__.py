@@ -44,7 +44,7 @@ def GmailCreateDraftWithAttachment(credentials, client: Sheet):
         mime_message = EmailMessage()
 
         # headers
-        mime_message['To'] = client.Email.replace(';', ',')
+        mime_message['To'] = client.Email.replace(';', ',').replace('\n', '')
         mime_message['From'] = 'residuosambientalessas@gmail.com'
         mime_message['Subject'] = 'BIENVENIDA A RESIDUOS AMBIENTALES SAS'
 
