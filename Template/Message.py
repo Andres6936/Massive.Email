@@ -102,4 +102,4 @@ def AddAttachmentGeneral(mimeMessage: EmailMessage):
             # Using the cache of general file
             mimeMessage.add_attachment(
                 cache.get(file), maintype, subtype,
-                filename=os.path.basename(fp.name))
+                filename=os.path.basename(file))
