@@ -1,0 +1,26 @@
+### Command Docker Run
+
+`
+podman run 
+  --name fief-server 
+  -p 8000:8000 
+  -d 
+  -e "SECRET=nBem1QhUZL_HsVQWZwaoX7y2Wc0Tm89-84YR-AWMyi5zw0zBLUnD0UPlD25Yy5nkYXtE8KCD6xQRcl_OkQ1PhA"
+  -e "FIEF_CLIENT_ID=oTjwhNro0PpwIlS9FJq9rvU2uA6dXRws21XY2nEDLpU" 
+  -e "FIEF_CLIENT_SECRET=NQB2JJoxGYBx_xIU5GYrdKzKitC-wsMgJ0mfK-LOX4c" 
+  -e "ENCRYPTION_KEY=BMVSk4rzcQfttEABD7iTdtIqG1e5Z2u7iW1XJ1lsTBA=" 
+  -e "PORT=8000" 
+  -e "ROOT_DOMAIN=127.0.0.1:8000" 
+  -e "FIEF_DOMAIN=127.0.0.1:8000" 
+  -e "FIEF_MAIN_USER_EMAIL=adan@grr.la" 
+  -e "FIEF_MAIN_USER_PASSWORD=c+36LRg]|P]v9KmT05{n" 
+  -e "CSRF_COOKIE_SECURE=False" 
+  -e "SESSION_DATA_COOKIE_SECURE=False" 
+  -e "USER_LOCALE_COOKIE_SECURE=False" 
+  -e "LOGIN_HINT_COOKIE_SECURE=False" 
+  -e "LOGIN_SESSION_COOKIE_SECURE=False" 
+  -e "REGISTRATION_SESSION_COOKIE_SECURE=False" 
+  -e "SESSION_COOKIE_SECURE=False" 
+  -e "FIEF_ADMIN_SESSION_COOKIE_SECURE=False" 
+  ghcr.io/fief-dev/fief:latest
+`
