@@ -15,19 +15,15 @@ def GetMessageTemplate():
                 
                 <p>Se&ntilde;ores:</p>
                 
-                <p>NOMBRE DEL GENERADOR</p>
-                
-                <p>NIT Y/O CC</p>
-                
-                <p>NOMBRE PERSONA A CARGO</p>
-                
-                <p>DIRECCI&Oacute;N</p>
-                
-                <p>TELEFONO</p>
-                
-                <p>EMAIL</p>
-                
-                <p>La ciudad</p>
+                <p>
+                    NOMBRE DEL GENERADOR<br />
+                    NIT Y/O CC<br />
+                    NOMBRE PERSONA A CARGO<br />
+                    DIRECCI&Oacute;N<br />
+                    TELEFONO<br />
+                    EMAIL<br />
+                    La ciudad<br />
+                </p>
                 
                 <p>&nbsp;</p>
                 
@@ -52,7 +48,7 @@ def GetMessageTemplate():
                     <li>Licencia Ambiental Aliados (Prosarc y Ecoentorno)</li>
                     <li>Brochure de Servicios RE-AM</li>
                     <li>Certificaciones Bancarias y MEDIOS DE PAGO AUTORIZADOS: Nequi y Daviplata.</li>
-                    <li>C&aacute;mara de Comercio menor a 30 dias</li>
+                    <li>C&aacute;mara de Comercio menor a 30 d&iacute;as</li>
                     <li>Rut</li>
                     <li>Fotocopia de CC RL</li>
                 </ol>
