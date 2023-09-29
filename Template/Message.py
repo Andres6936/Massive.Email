@@ -68,6 +68,7 @@ def GetMessageTemplate(client: Sheet):
             
              <footer>
                  <p>Atentamente, <br /></p>
+                 <p><strong>ORIGINAL FIRMADO</strong> <br /></p>
             
                  <p>
                      <strong>YOMAIRA BEYTAR FLOREZ</strong><br />
