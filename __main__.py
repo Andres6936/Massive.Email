@@ -4,7 +4,6 @@ import base64
 import mimetypes
 import os
 import os.path
-
 from email.message import EmailMessage
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
@@ -17,7 +16,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from Entity.Client import Client
+from Entity.Sheet import Sheet
 from Template.Message import GetMessageTemplate, AddAttachmentGeneral
 
 # If modifying these scopes, delete the file token.json.
@@ -29,7 +28,7 @@ SCOPES = [
 ]
 
 
-def GmailCreateDraftWithAttachment(credentials):
+def GmailCreateDraftWithAttachment(credentials, client: Sheet):
     """Create and insert a draft email with attachment.
        Print the returned draft's message and id.
       Returns: Draft object, including draft id and message meta data.
@@ -45,13 +44,13 @@ def GmailCreateDraftWithAttachment(credentials):
         mime_message = EmailMessage()
 
         # headers
-        mime_message['To'] = 'residuosambientalessas@gmail.com'
+        mime_message['To'] = [email.trim() for email in client.Email.split(';')]
         mime_message['From'] = 'residuosambientalessas@gmail.com'
         mime_message['Subject'] = 'BIENVENIDA A RESIDUOS AMBIENTALES SAS'
 
         # text
         mime_message.add_header('Content-Type', 'text/html')
-        mime_message.set_payload(GetMessageTemplate(), 'utf-8')
+        mime_message.set_payload(GetMessageTemplate(client), 'utf-8')
 
         # Added the General Files for All Message
         AddAttachmentGeneral(mime_message)
@@ -106,7 +105,7 @@ def build_file_part(file):
     return msg
 
 
-def main():
+def SendMassiveEmail():
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels.
     """
@@ -128,10 +127,10 @@ def main():
         with open('Token.json', 'w') as token:
             token.write(creds.to_json())
 
-    GmailCreateDraftWithAttachment(creds)
+    for client in Sheet.select():
+        print(f"Sending Email to {client.Name}")
+        GmailCreateDraftWithAttachment(creds, client)
 
 
 if __name__ == '__main__':
-    main()
-    # for client in Client.select():
-    #    print(client.Serial)
+    SendMassiveEmail()

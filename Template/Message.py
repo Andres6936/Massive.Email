@@ -3,9 +3,11 @@ import mimetypes
 import os.path
 from email.message import EmailMessage
 
+from Entity.Sheet import Sheet
 
-def GetMessageTemplate():
-    return """
+
+def GetMessageTemplate(client: Sheet):
+    return f"""
     <html lang='es'>
         <body>
             <section>
@@ -16,12 +18,12 @@ def GetMessageTemplate():
                 <p>Se&ntilde;ores:</p>
                 
                 <p>
-                    NOMBRE DEL GENERADOR<br />
-                    NIT Y/O CC<br />
-                    NOMBRE PERSONA A CARGO<br />
-                    DIRECCI&Oacute;N<br />
-                    TELEFONO<br />
-                    EMAIL<br />
+                    {client.Name}<br />
+                    {client.Identification}<br />
+                    {client.ContactPerson}<br />
+                    {client.Address}<br />
+                    {client.NumberContact}<br />
+                    {[email.trim() for email in client.Email]}<br />
                     La ciudad<br />
                 </p>
                 
