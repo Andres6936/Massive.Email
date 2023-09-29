@@ -19,8 +19,7 @@ def GetMessageTemplate(client: Sheet):
                 
                 <p>
                     {client.Name}<br />
-                    NIT.: <br />
-                    {client.Identification}<br />
+                    NIT.: {client.Identification}<br />
                     {client.ContactPerson}<br />
                     {client.Address}<br />
                     {client.NumberContact}<br />
@@ -35,8 +34,6 @@ def GetMessageTemplate(client: Sheet):
                 <p>&nbsp;</p>
                 
                 <p>Reciba un Cordial Saludo,</p>
-                
-                <p>&nbsp;</p>
                 
                 <p>&nbsp;</p>
                 
@@ -68,7 +65,7 @@ def GetMessageTemplate(client: Sheet):
             
              <footer>
                  <p>Atentamente, <br /></p>
-                 <p><strong>ORIGINAL FIRMADO</strong> <br /></p>
+                 <p style="font-size: 1.3rem"><strong>ORIGINAL FIRMADO</strong> <br /></p>
             
                  <p>
                      <strong>YOMAIRA BEYTAR FLOREZ</strong><br />

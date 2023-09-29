@@ -130,6 +130,7 @@ def SendMassiveEmail():
     for client in Sheet.select():
         print(f"Sending Email to {client.Name}")
         GmailCreateDraftWithAttachment(creds, client)
+        print(f"Email Send to {client.Name}")
 
 
 if __name__ == '__main__':
