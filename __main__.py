@@ -18,7 +18,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from Entity.Client import Client
-from Template.Message import GetMessageTemplate
+from Template.Message import GetMessageTemplate, AddAttachmentGeneral
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -53,15 +53,8 @@ def GmailCreateDraftWithAttachment(credentials):
         mime_message.add_header('Content-Type', 'text/html')
         mime_message.set_payload(GetMessageTemplate(), 'utf-8')
 
-        # attachment
-        attachment_filename = 'DSC_4966.jpg'
-        # guessing the MIME type
-        type_subtype, _ = mimetypes.guess_type(attachment_filename)
-        maintype, subtype = type_subtype.split('/')
-
-        with open(attachment_filename, 'rb') as fp:
-            attachment_data = fp.read()
-        mime_message.add_attachment(attachment_data, maintype, subtype)
+        # Added the General Files for All Message
+        AddAttachmentGeneral(mime_message)
 
         encoded_message = base64.urlsafe_b64encode(mime_message.as_bytes()).decode()
 
