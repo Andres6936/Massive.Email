@@ -4,7 +4,6 @@ import base64
 import mimetypes
 import os
 import os.path
-import google.auth
 
 from email.message import EmailMessage
 from email.mime.audio import MIMEAudio
@@ -19,6 +18,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from Entity.Client import Client
+from Template.Message import GetMessageTemplate
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
@@ -50,10 +50,8 @@ def GmailCreateDraftWithAttachment(credentials):
         mime_message['Subject'] = 'sample with attachment'
 
         # text
-        mime_message.set_content(
-            'Hi, this is automated mail with attachment.'
-            'Please do not reply.'
-        )
+        mime_message.add_header('Content-Type', 'text/html')
+        mime_message.set_payload(GetMessageTemplate(), 'utf-8')
 
         # attachment
         attachment_filename = 'DSC_4966.jpg'
@@ -137,24 +135,7 @@ def main():
         with open('Token.json', 'w') as token:
             token.write(creds.to_json())
 
-    try:
-        # Call the Gmail API
-        service = build('gmail', 'v1', credentials=creds)
-        results = service.users().labels().list(userId='me').execute()
-        labels = results.get('labels', [])
-
-        if not labels:
-            print('No labels found.')
-            return
-        print('Labels:')
-        for label in labels:
-            print(label['name'])
-
-        GmailCreateDraftWithAttachment(creds)
-
-    except HttpError as error:
-        # TODO(developer) - Handle errors from gmail API.
-        print(f'An error occurred: {error}')
+    GmailCreateDraftWithAttachment(creds)
 
 
 if __name__ == '__main__':
