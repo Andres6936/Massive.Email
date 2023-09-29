@@ -23,7 +23,7 @@ def GetMessageTemplate(client: Sheet):
                     {client.ContactPerson}<br />
                     {client.Address}<br />
                     {client.NumberContact}<br />
-                    {[email.trim() for email in client.Email]}<br />
+                    {client.Email}<br />
                     La ciudad<br />
                 </p>
                 
