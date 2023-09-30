@@ -24,7 +24,7 @@ the table is:
 ```sql
 CREATE TABLE Sheet
 (
-    Name           TEXT,
+    Name           TEXT PRIMARY KEY,
     Identification TEXT,
     TypeAndName    TEXT,
     RepresentLegal TEXT,
