@@ -1,26 +1,19 @@
-### Command Docker Run
+### Script Description
 
-`
-podman run 
-  --name fief-server 
-  -p 8000:8000 
-  -d 
-  -e "SECRET=nBem1QhUZL_HsVQWZwaoX7y2Wc0Tm89-84YR-AWMyi5zw0zBLUnD0UPlD25Yy5nkYXtE8KCD6xQRcl_OkQ1PhA"
-  -e "FIEF_CLIENT_ID=oTjwhNro0PpwIlS9FJq9rvU2uA6dXRws21XY2nEDLpU" 
-  -e "FIEF_CLIENT_SECRET=NQB2JJoxGYBx_xIU5GYrdKzKitC-wsMgJ0mfK-LOX4c" 
-  -e "ENCRYPTION_KEY=BMVSk4rzcQfttEABD7iTdtIqG1e5Z2u7iW1XJ1lsTBA=" 
-  -e "PORT=8000" 
-  -e "ROOT_DOMAIN=127.0.0.1:8000" 
-  -e "FIEF_DOMAIN=127.0.0.1:8000" 
-  -e "FIEF_MAIN_USER_EMAIL=adan@grr.la" 
-  -e "FIEF_MAIN_USER_PASSWORD=c+36LRg]|P]v9KmT05{n" 
-  -e "CSRF_COOKIE_SECURE=False" 
-  -e "SESSION_DATA_COOKIE_SECURE=False" 
-  -e "USER_LOCALE_COOKIE_SECURE=False" 
-  -e "LOGIN_HINT_COOKIE_SECURE=False" 
-  -e "LOGIN_SESSION_COOKIE_SECURE=False" 
-  -e "REGISTRATION_SESSION_COOKIE_SECURE=False" 
-  -e "SESSION_COOKIE_SECURE=False" 
-  -e "FIEF_ADMIN_SESSION_COOKIE_SECURE=False" 
-  ghcr.io/fief-dev/fief:latest
-`
+Script used for send massive email to several list of clients with several
+emails registers, the message of email is parametrized in the file `Message.py`
+the information of each email is unique each client, all the email send need
+attachment files, and it is common in the email, for this objective the
+files stored in the directory `Attachment/General/*` will be attachment to
+each email send.
+
+Currently, the script not send the email, only create the draft for peer 
+review manual for an operator and send for these.
+
+### Using
+
+The script use the Google API Gmail for send the email (or create the draft)
+for that this program work needed download the `Credential.json` from Console
+Google Cloud, with this file, the program in the first execution create the
+`Token.json` when the auth is successful, it avoids trigger the auth with each
+execution of program.
