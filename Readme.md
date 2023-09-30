@@ -17,3 +17,23 @@ for that this program work needed download the `Credential.json` from Console
 Google Cloud, with this file, the program in the first execution create the
 `Token.json` when the auth is successful, it avoids trigger the auth with each
 execution of program.
+
+The list of client is get from a SQLite database, the script used for create
+the table is:
+
+```sql
+CREATE TABLE Sheet
+(
+    Name           TEXT,
+    Identification TEXT,
+    TypeAndName    TEXT,
+    RepresentLegal TEXT,
+    ContactPerson  TEXT,
+    NumberContact  TEXT,
+    Address        TEXT,
+    Neighborhood   TEXT,
+    Location       TEXT,
+    Email          TEXT,
+    Environment    TEXT
+);
+```
