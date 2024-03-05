@@ -23,7 +23,7 @@ async function sendEmail(to: string, attachments: Attachment[]) {
     const info = await transporter.sendMail({
         from: 'logistica@residuosambientales.com',
         to: emails,
-        cc: 'logistica@residuosambientales.com',
+        cc: ['logistica@residuosambientales.com', 'atencionalcliente@residuosambientales.com'],
         subject: 'CERTIFICADOS DE DISPOSICIÓN FINAL - ENERO 2024 - RE-AM',
         html: await renderAsync(Email()),
         attachments: attachments,
