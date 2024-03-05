@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 })
 
 async function sendEmail(to: string, attachments: Attachment[]) {
-    const emails = to.split(';').join(',')
+    const emails = to.split(';')
 
     const info = await transporter.sendMail({
         from: 'logistica@residuosambientales.com',
