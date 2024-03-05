@@ -1,7 +1,11 @@
 import * as React from 'react';
-import {Html, Button, Text, Hr} from "@react-email/components";
+import {Html, Button, Text, Hr, Img} from "@react-email/components";
 
-export function Email() {
+type Props = {
+    imageURL: string
+}
+
+export function Email(props: Props) {
     return (
         <Html>
             <Text>Saludos cordiales,</Text>
@@ -20,6 +24,7 @@ export function Email() {
             <Text style={{fontStyle: 'italic'}}>
                 Residuos Ambientales SAS
             </Text>
+            <Img width={128} height={128} alt="Logo Residuos Ambientales" src={props.imageURL}/>
             <Button
                 style={{fontStyle: 'italic'}}
                 href="mailto:logistica@residuosambientales.com">
