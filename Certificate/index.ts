@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
 import {drizzle} from 'drizzle-orm/bun-sqlite';
 import {Database} from 'bun:sqlite';
-import {integer, sqliteTable, text} from "drizzle-orm/sqlite-core";
 import {renderAsync} from "@react-email/render";
 import {Email} from "./email.tsx";
 import {eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
 import fs from 'node:fs';
+import {Certificates} from "./schema.ts";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -42,16 +42,6 @@ async function sendEmail(to: string, attachments: Attachment[]) {
     }
 }
 
-
-const Certificates = sqliteTable('Certificates', {
-    Serial: integer('Serial').primaryKey({autoIncrement: true}),
-    Directory: text('Directory').notNull(),
-    Name: text('Name').notNull(),
-    Email: text('Email').notNull(),
-    File: text('File').notNull(),
-    MessageId: text('MessageId'),
-    ResponseMessage: text('ResponseMessage'),
-});
 
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
