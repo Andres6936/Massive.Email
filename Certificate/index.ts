@@ -2,10 +2,9 @@ import nodemailer from 'nodemailer';
 import {drizzle} from 'drizzle-orm/bun-sqlite';
 import {Database} from 'bun:sqlite';
 import {renderAsync} from "@react-email/render";
-import {Email} from "./email.tsx";
+import Email from "./emails/email.tsx";
 import {eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
-import fs from 'node:fs';
 import {Certificates} from "./schema.ts";
 
 const transporter = nodemailer.createTransport({
@@ -18,8 +17,6 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-const base64ImageOfLogo = fs.readFileSync('Logo.png').toString('base64url')
-
 async function sendEmail(to: string, attachments: Attachment[]) {
     const emails = to.split(';')
 
@@ -28,9 +25,7 @@ async function sendEmail(to: string, attachments: Attachment[]) {
         to: emails,
         cc: ['logistica@residuosambientales.com', 'atencionalcliente@residuosambientales.com'],
         subject: 'CERTIFICADOS DE DISPOSICIÓN FINAL - ENERO 2024 - RE-AM',
-        html: await renderAsync(Email({
-            imageURL: base64ImageOfLogo
-        })),
+        html: await renderAsync(Email()),
         attachments: attachments,
     })
 
