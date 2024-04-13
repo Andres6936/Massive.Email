@@ -8,4 +8,6 @@ export const Certificates = sqliteTable('Certificates', {
     File: text('File').notNull(),
     MessageId: text('MessageId'),
     ResponseMessage: text('ResponseMessage'),
+    Month: text('Month'),
+    Day: integer('Day'),
 });
