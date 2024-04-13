@@ -6,10 +6,12 @@ const baseURL = process.env.NODE_ENV === 'production'
     : ''
 
 type Props = {
-    previewText: string
+    previewText: string,
+    month: string,
+    year: number,
 }
 
-export default function Email({previewText}: Props) {
+export default function Email({previewText, month, year}: Props) {
     return (
         <Html>
             <Head/>
@@ -24,7 +26,7 @@ export default function Email({previewText}: Props) {
                             <Text className="leading-[18px]">
                                 <strong>RESIDUOS AMBIENTALES SAS</strong>, le envía adjunto el
                                 <strong> CERTIFICADO DE DISPOSICIÓN FINAL</strong>,
-                                correspondiente al mes de enero de 2024.
+                                correspondiente al mes de {month} de {year}.
                             </Text>
                             <Text>Muchas gracias por su atención</Text>
                             <Text>Cordialmente.</Text>
@@ -68,5 +70,7 @@ export default function Email({previewText}: Props) {
 }
 
 Email.PreviewProps = {
-    previewText: 'ASUNTO: CERTIFICADOS DE DISPOSICIÓN FINAL - ENERO 2024 - RE-AM'
+    previewText: 'ASUNTO: CERTIFICADOS DE DISPOSICIÓN FINAL - ENERO 2024 - RE-AM',
+    month: "Enero",
+    year: 2024,
 } satisfies Props
