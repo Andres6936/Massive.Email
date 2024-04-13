@@ -3,7 +3,7 @@ import {drizzle} from 'drizzle-orm/bun-sqlite';
 import {Database} from 'bun:sqlite';
 import {renderAsync} from "@react-email/render";
 import Email from "./emails/email.tsx";
-import {eq, isNull} from "drizzle-orm";
+import {and, eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
 import {Certificates} from "./schema.ts";
 
@@ -17,15 +17,19 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-async function sendEmail(to: string, attachments: Attachment[]) {
+async function sendEmail(to: string, attachments: Attachment[], month: string) {
     const emails = to.split(';')
 
     const info = await transporter.sendMail({
         from: 'logistica@residuosambientales.com',
         to: emails,
         cc: ['logistica@residuosambientales.com', 'atencionalcliente@residuosambientales.com'],
-        subject: 'CERTIFICADOS DE DISPOSICIÓN FINAL - ENERO 2024 - RE-AM',
-        html: await renderAsync(Email()),
+        subject: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
+        html: await renderAsync(Email({
+            previewText: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
+            month: month,
+            year: 2024,
+        })),
         attachments: attachments,
     })
 
@@ -37,42 +41,62 @@ async function sendEmail(to: string, attachments: Attachment[]) {
     }
 }
 
+async function getAttachmentFromPath(filename: string, path: string): Promise<Attachment> {
+    const buffer = []
+    const streamFile = Bun.file(path).stream();
+    for await (const data of streamFile) {
+        buffer.push(data);
+    }
+
+    return {
+        filename: filename,
+        content: Buffer.concat(buffer)
+    };
+}
+
 
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
 
-const result = db.select()
+const entitiesToSendEmails = db.selectDistinct({
+    Name: Certificates.Name,
+    Month: Certificates.Month,
+    Email: Certificates.Email,
+})
     .from(Certificates)
-    .where(isNull(Certificates.MessageId))
     .all()
 
-for (let certificate of result) {
+for (let entity of entitiesToSendEmails) {
+    const directoryAndFiles = db.select()
+        .from(Certificates)
+        .where(and(eq(Certificates.Name, entity.Name), isNull(Certificates.MessageId)))
+        .all()
+
+    const pathOfCertificates = directoryAndFiles.map((x, index) => ({
+        Name: `${x.Name}-(${index}).pdf`,
+        Path: x.Directory + '/' + x.File + '.pdf'
+    }));
+
+    const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
+        getAttachmentFromPath(x.Name, x.Path)
+    ));
+
     try {
-        const path = certificate.Directory + '/' + certificate.File + '.pdf'
-        console.log("Sending email to (%s) with attachment: %s", certificate.Name, path)
+        console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
+        const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Month!);
 
-        const buffer = []
-        const streamFile = Bun.file(path).stream();
-        for await (const data of streamFile) {
-            buffer.push(data);
-        }
-
-        const responseMailer = await sendEmail(certificate.Email, [{
-            filename: certificate.Name + '.pdf',
-            content: Buffer.concat(buffer),
-        }]);
+        // await db.update(Certificates)
+        //     .set({
+        //         MessageId: responseMailer.MessageId,
+        //         ResponseMessage: responseMailer.ResponseMessage
+        //     })
+        //     .where(eq(Certificates.Serial, certificate.Serial));
 
         console.log('Successful sent message, updating register with information of message sent')
-        await db.update(Certificates)
-            .set({
-                MessageId: responseMailer.MessageId,
-                ResponseMessage: responseMailer.ResponseMessage
-            })
-            .where(eq(Certificates.Serial, certificate.Serial));
-
         // Wait two seconds for send a new email
         await new Promise(resolve => setTimeout(resolve, 2000));
+
     } catch (e) {
-        console.error('Cannot send email to user (%s) with email: %s, caused by: ', certificate.Name, certificate.Email, e)
+        console.error('Cannot send email to user (%s) with email: %s, caused by: ', entity.Name, entity.Email, e)
     }
 }
