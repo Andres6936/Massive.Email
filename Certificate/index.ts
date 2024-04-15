@@ -62,6 +62,7 @@ const db = drizzle(sqlite);
 const entitiesToSendEmails = db.select()
     .from(People)
     .where(isNull(People.MessageId))
+    .limit(180)
     .all()
 
 for (let entity of entitiesToSendEmails) {
@@ -100,7 +101,7 @@ for (let entity of entitiesToSendEmails) {
                 if (!fs.existsSync(outputDirectory)) {
                     fs.mkdirSync(outputDirectory, {recursive: true})
                 }
-                console.log("Renaming file %s to %s", certificate.Path, certificate.Name);
+                console.log("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
                 fs.renameSync(certificate.Path, outputDirectory + certificate.Name);
             } catch (e) {
                 console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
