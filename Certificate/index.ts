@@ -3,7 +3,7 @@ import {drizzle} from 'drizzle-orm/bun-sqlite';
 import {Database} from 'bun:sqlite';
 import {renderAsync} from "@react-email/render";
 import Email from "./emails/email.tsx";
-import {and, eq, isNull} from "drizzle-orm";
+import {eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
 import {Certificates, People} from "./schema.ts";
 import fs from "node:fs";
