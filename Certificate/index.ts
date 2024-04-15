@@ -5,7 +5,8 @@ import {renderAsync} from "@react-email/render";
 import Email from "./emails/email.tsx";
 import {and, eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
-import {Certificates} from "./schema.ts";
+import {Certificates, People} from "./schema.ts";
+import fs from "node:fs";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -58,23 +59,21 @@ async function getAttachmentFromPath(filename: string, path: string): Promise<At
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
 
-const entitiesToSendEmails = db.selectDistinct({
-    Name: Certificates.Name,
-    Month: Certificates.Month,
-    Email: Certificates.Email,
-})
-    .from(Certificates)
+const entitiesToSendEmails = db.select()
+    .from(People)
+    .where(isNull(People.MessageId))
     .all()
 
 for (let entity of entitiesToSendEmails) {
     const directoryAndFiles = db.select()
         .from(Certificates)
-        .where(and(eq(Certificates.Name, entity.Name), isNull(Certificates.MessageId)))
+        .where(eq(Certificates.Name, entity.Name))
         .all()
 
     const pathOfCertificates = directoryAndFiles.map((x, index) => ({
         Name: `${x.Name}-(${index}).pdf`,
-        Path: x.Directory + '/' + x.File + '.pdf'
+        Path: x.Directory + '/' + x.File + '.pdf',
+        Directory: x.Directory,
     }));
 
     const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
@@ -85,14 +84,29 @@ for (let entity of entitiesToSendEmails) {
         console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
         const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Month!);
 
-        // await db.update(Certificates)
-        //     .set({
-        //         MessageId: responseMailer.MessageId,
-        //         ResponseMessage: responseMailer.ResponseMessage
-        //     })
-        //     .where(eq(Certificates.Serial, certificate.Serial));
-
         console.log('Successful sent message, updating register with information of message sent')
+        await db.update(People)
+            .set({
+                MessageId: responseMailer.MessageId,
+                ResponseMessage: responseMailer.ResponseMessage
+            })
+            .where(eq(People.Serial, entity.Serial));
+
+        console.log("Moving files sent to new directory")
+        for (let certificate of pathOfCertificates) {
+            const outputDirectory = `Output/${certificate.Directory}/`;
+
+            try {
+                if (!fs.existsSync(outputDirectory)) {
+                    fs.mkdirSync(outputDirectory, {recursive: true})
+                }
+                console.log("Renaming file %s to %s", certificate.Path, certificate.Name);
+                fs.renameSync(certificate.Path, outputDirectory + certificate.Name);
+            } catch (e) {
+                console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
+            }
+        }
+
         // Wait two seconds for send a new email
         await new Promise(resolve => setTimeout(resolve, 2000));
 

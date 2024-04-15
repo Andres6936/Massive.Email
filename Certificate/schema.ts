@@ -6,8 +6,15 @@ export const Certificates = sqliteTable('Certificates', {
     Name: text('Name').notNull(),
     Email: text('Email').notNull(),
     File: text('File').notNull(),
-    MessageId: text('MessageId'),
-    ResponseMessage: text('ResponseMessage'),
     Month: text('Month'),
     Day: integer('Day'),
 });
+
+export const People = sqliteTable('People', {
+    Serial: integer('Serial').primaryKey({autoIncrement: true}),
+    Name: text('Name').notNull(),
+    Email: text('Email').notNull(),
+    Month: text('Month').notNull(),
+    MessageId: text('MessageId'),
+    ResponseMessage: text('ResponseMessage'),
+})
