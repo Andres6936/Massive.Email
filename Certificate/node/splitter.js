@@ -2,9 +2,12 @@
 
 import muhammara from 'muhammara'
 import fs from 'node:fs'
+import util from 'node:util'
 import {readdir} from 'node:fs/promises'
 import {resolve, basename} from "node:path";
+import {exec} from 'node:child_process';
 
+const execPromise = util.promisify(exec);
 
 /**
  * Retrieves all files in a given directory and its subdirectories.
@@ -47,9 +50,14 @@ async function* getFiles(dir) {
         })
 
         for (let i = 1; i <= pages; i++) {
-            const writer = muhammara.createWriter(`${objDumpOfSeparatedFiles}/Output${i}.pdf`)
+            const outputFilePath = `${objDumpOfSeparatedFiles}/Output${i}-temp.pdf`;
+            const compressFilePath = `${objDumpOfSeparatedFiles}/Output${i}.pdf`;
+            const writer = muhammara.createWriter(outputFilePath);
             writer.createPDFCopyingContext(reader).appendPDFPageFromPDF(i - 1);
             writer.end();
+
+            await execPromise(`gsc -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${compressFilePath}" ${outputFilePath}`)
+            fs.unlinkSync(outputFilePath);
         }
     }
 })()
