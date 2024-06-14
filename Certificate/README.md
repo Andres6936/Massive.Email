@@ -32,3 +32,11 @@ CREATE TABLE Certificates
     ResponseMessage TEXT
 );
 ```
+
+Used for populate the table of People:
+
+```sql
+INSERT INTO People (Name, Email, Month)
+SELECT DISTINCT Certificates.Name, Certificates.Email, Certificates.Month
+FROM Certificates;
+```
