@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
     }
 })
 
-async function sendEmail(to: string, attachments: Attachment[], month: string) {
+async function sendEmail(to: string, attachments: Attachment[], name: string, month: string) {
     const emails = to.split(';')
 
     const info = await transporter.sendMail({
@@ -28,6 +28,7 @@ async function sendEmail(to: string, attachments: Attachment[], month: string) {
         subject: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
         html: await renderAsync(Email({
             previewText: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
+            name: name,
             month: month,
             year: 2024,
         })),
@@ -73,7 +74,7 @@ for (let entity of entitiesToSendEmails) {
 
     const pathOfCertificates = directoryAndFiles.map((x, index) => ({
         Name: `${x.Name}-(${index}).pdf`,
-        Path: x.Directory + '/' + x.File + '.pdf',
+        Path: x.Directory + '/Output' + x.File + '.pdf',
         Directory: x.Directory,
     }));
 
@@ -83,7 +84,7 @@ for (let entity of entitiesToSendEmails) {
 
     try {
         console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
-        const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Month!);
+        const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Name!, entity.Month!);
 
         console.log('Successful sent message, updating register with information of message sent')
         await db.update(People)
