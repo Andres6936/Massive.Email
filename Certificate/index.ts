@@ -103,7 +103,7 @@ for (let entity of entitiesToSendEmails) {
                     fs.mkdirSync(outputDirectory, {recursive: true})
                 }
                 console.log("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
-                fs.renameSync(certificate.Path, outputDirectory + certificate.Name);
+                fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
             } catch (e) {
                 console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
             }
