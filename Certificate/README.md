@@ -36,7 +36,17 @@ CREATE TABLE Certificates
 Used for populate the table of People:
 
 ```sql
+-- Clear the values in the register of certificates
+UPDATE Certificates SET Name = TRIM(Name);
+UPDATE Certificates SET Email = replace(TRIM(Email), '-', ';');
+UPDATE Certificates SET Email = replace(TRIM(Email), ' ', '');
+
+-- Prepare the table for the send of emails
 INSERT INTO People (Name, Email, Month)
 SELECT DISTINCT Certificates.Name, Certificates.Email, Certificates.Month
 FROM Certificates;
+
+-- Verify if exist register duplicates, these query must be return 0 results,
+-- if results is returned, only a register should be choice
+SELECT Name, COUNT(*) FROM People GROUP BY Name HAVING COUNT(*) > 1;
 ```
