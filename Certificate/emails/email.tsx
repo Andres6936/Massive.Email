@@ -43,7 +43,7 @@ export default function Email({previewText, name, month, year}: Props) {
                                 Ricardo Suarez
                             </Text>
                             <Text className="font-bold m-0 p-0 text-lg">
-                                AREA DE LOGISTICA Y PROGRAMACION.
+                                ÁREA DE LOGÍSTICA Y PROGRAMACIÓN.
                             </Text>
                             <Text className="font-bold uppercase m-0 p-0">
                                 Residuos Ambientales SAS
