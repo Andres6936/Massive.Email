@@ -38,7 +38,6 @@ Used for populate the table of People:
 ```sql
 -- Clear the values in the register of certificates
 UPDATE Certificates SET Name = TRIM(Name);
-UPDATE Certificates SET Email = replace(TRIM(Email), '-', ';');
 UPDATE Certificates SET Email = replace(TRIM(Email), ' ', '');
 
 -- Prepare the table for the send of emails
