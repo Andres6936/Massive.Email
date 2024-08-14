@@ -7,6 +7,7 @@ import {eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
 import {Certificates, People} from "./schema.ts";
 import fs from "node:fs";
+import {resolve} from "node:path";
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -56,63 +57,68 @@ async function getAttachmentFromPath(filename: string, path: string): Promise<At
     };
 }
 
-
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
+let entitiesToSendEmails;
 
-const entitiesToSendEmails = db.select()
-    .from(People)
-    .where(isNull(People.MessageId))
-    .limit(180)
-    .all()
-
-for (let entity of entitiesToSendEmails) {
-    const directoryAndFiles = db.select()
-        .from(Certificates)
-        .where(eq(Certificates.Name, entity.Name))
+do {
+    entitiesToSendEmails = db.select()
+        .from(People)
+        .where(isNull(People.MessageId))
+        .limit(180)
         .all()
 
-    const pathOfCertificates = directoryAndFiles.map((x, index) => ({
-        Name: `${x.Name}-(${index}).pdf`,
-        Path: x.Directory + '/Output' + x.File + '.pdf',
-        Directory: x.Directory,
-    }));
+    for (let entity of entitiesToSendEmails) {
+        const directoryAndFiles = db.select()
+            .from(Certificates)
+            .where(eq(Certificates.Name, entity.Name))
+            .all()
 
-    const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
-        getAttachmentFromPath(x.Name, x.Path)
-    ));
+        const pathOfCertificates = directoryAndFiles.map((x, index) => ({
+            Name: `${x.Name}-(${index}).pdf`,
+            Path: x.Directory + '/Output' + x.File + '.pdf',
+            Directory: x.Directory,
+        }));
 
-    try {
-        console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
-        const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Name!, entity.Month!);
+        const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
+            getAttachmentFromPath(x.Name, x.Path)
+        ));
 
-        console.log('Successful sent message, updating register with information of message sent')
-        await db.update(People)
-            .set({
-                MessageId: responseMailer.MessageId,
-                ResponseMessage: responseMailer.ResponseMessage
-            })
-            .where(eq(People.Serial, entity.Serial));
+        try {
+            console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
+            const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Name!, entity.Month!);
 
-        console.log("Moving files sent to new directory")
-        for (let certificate of pathOfCertificates) {
-            const outputDirectory = `Output/${certificate.Directory}/`;
+            console.log('Successful sent message, updating register with information of message sent')
+            await db.update(People)
+                .set({
+                    MessageId: responseMailer.MessageId,
+                    ResponseMessage: responseMailer.ResponseMessage
+                })
+                .where(eq(People.Serial, entity.Serial));
 
-            try {
-                if (!fs.existsSync(outputDirectory)) {
-                    fs.mkdirSync(outputDirectory, {recursive: true})
+            console.log("Moving files sent to new directory")
+            for (let certificate of pathOfCertificates) {
+                const outputDirectory = `Output/${certificate.Directory}/`;
+
+                try {
+                    if (!fs.existsSync(outputDirectory)) {
+                        fs.mkdirSync(outputDirectory, {recursive: true})
+                    }
+                    console.log("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
+                    fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
+                } catch (e) {
+                    console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
                 }
-                console.log("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
-                fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
-            } catch (e) {
-                console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
             }
+
+            // Wait two seconds for send a new email
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+        } catch (e) {
+            console.error('Cannot send email to user (%s) with email: %s, caused by: ', entity.Name, entity.Email, e)
         }
-
-        // Wait two seconds for send a new email
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-    } catch (e) {
-        console.error('Cannot send email to user (%s) with email: %s, caused by: ', entity.Name, entity.Email, e)
     }
-}
+
+    // Wait for 1 hour
+    await new Promise(resolve => setTimeout(resolve, 3_600_000));
+} while (entitiesToSendEmails.length >= 0);
