@@ -19,15 +19,28 @@ This project was created using `bun init` in bun v1.0.30. [Bun](https://bun.sh) 
 The list of client is get from a SQLite database, the script used for create the table is:
 
 ```sql
-CREATE TABLE Certificates
+create table Certificates
+(
+    Serial    integer not null
+        constraint Certificates_PK
+            primary key autoincrement,
+    Directory TEXT    not null,
+    Name      TEXT    not null,
+    Email     TEXT    not null,
+    File      TEXT    not null,
+    Month     TEXT,
+    Day       integer
+);
+
+
+CREATE TABLE People
 (
     Serial          INTEGER NOT NULL
-        CONSTRAINT Certificates_PK
+        CONSTRAINT People_PK
             PRIMARY KEY AUTOINCREMENT,
-    Directory       TEXT    NOT NULL,
     Name            TEXT    NOT NULL,
     Email           TEXT    NOT NULL,
-    File            TEXT    NOT NULL,
+    Month           TEXT    NOT NULL,
     MessageId       TEXT,
     ResponseMessage TEXT
 );
