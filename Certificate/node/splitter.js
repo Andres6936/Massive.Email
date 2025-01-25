@@ -6,6 +6,13 @@ import util from 'node:util'
 import {readdir} from 'node:fs/promises'
 import {resolve, basename} from "node:path";
 import {exec} from 'node:child_process';
+import { LogLayer, ConsoleTransport } from 'loglayer'
+
+const log = new LogLayer({
+    transport: new ConsoleTransport({
+        logger: console,
+    }),
+})
 
 const execPromise = util.promisify(exec);
 
@@ -33,17 +40,18 @@ async function* getFiles(dir) {
 
 
 (async () => {
-    console.log("Start splitting PDF files")
+    log.info("Start splitting PDF files")
 
     for await (const file of getFiles('pdf/')) {
-        console.log('Processing the template file %s', file)
+        log.withContext({file})
+        log.info('Processing the template file')
 
         const basenameOfFile = basename(file).replace('.pdf', '')
         const objDumpOfSeparatedFiles = `obj/${basenameOfFile}`;
 
         const reader = muhammara.createReader(file)
         const pages = reader.getPagesCount();
-        console.log(`The total of pages to splitting is of ${pages} for the file: ${file}`)
+        log.info(`The total of pages to splitting is of ${pages}`)
 
         fs.mkdirSync(objDumpOfSeparatedFiles, {
             recursive: true
