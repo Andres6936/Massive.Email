@@ -5,10 +5,12 @@ import {renderAsync} from "@react-email/render";
 import Email from "./emails/email.tsx";
 import {eq, isNull} from "drizzle-orm";
 import type {Attachment} from "nodemailer/lib/mailer";
-import {type CertificateModel, Certificates, People, type PeopleModel} from "./schema.ts";
+import {Certificates, People, type PeopleModel} from "./schema.ts";
 import fs from "node:fs";
-import {resolve} from "node:path";
+import pLimit from 'p-limit'
+import os from 'node:os'
 
+const CURRENCY_LIMIT = os.cpus().length;
 const YEAR_CERTIFICATES = 2024
 
 const sqlite = new Database('../Certificates.sqlite');
@@ -126,9 +128,14 @@ do {
         .limit(180)
         .all()
 
+    const limit = pLimit(CURRENCY_LIMIT);
+    const promises = []
+
     for (let entity of entitiesToSendEmails) {
-        await processEntity(entity);
+        promises.push(limit(() => processEntity(entity)));
     }
+
+    await Promise.all(promises);
 
     // Wait for 1 hour
     await new Promise(resolve => setTimeout(resolve, 3_600_000));
