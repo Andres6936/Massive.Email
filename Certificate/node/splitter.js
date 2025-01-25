@@ -38,6 +38,7 @@ async function* getFiles(dir) {
     }
 }
 
+const startTime = new Date().getTime();
 
 (async () => {
     log.info("Start splitting PDF files")
@@ -67,6 +68,9 @@ async function* getFiles(dir) {
             fs.unlinkSync(outputFilePath);
             log.info(`The file ${i} was processed`)
         }
+
+        const endTime = new Date().getTime();
+        log.info(`The process took ${(endTime - startTime) / 1000} seconds`)
     }
 })()
 
