@@ -88,7 +88,7 @@ async function processEntity(entity: PeopleModel) {
 
     const [firstName, ...restNames] = entity.Name!.split(' ');
     const shortName = firstName + ' ' + restNames.at(-1);
-    log.info('Loading attachment from path')
+    log.info('Loading attachment from path of %s', shortName)
 
     const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
         getAttachmentFromPath(x.Name, x.Path)
@@ -106,7 +106,7 @@ async function processEntity(entity: PeopleModel) {
             })
             .where(eq(People.Serial, entity.Serial));
 
-        log.info("Moving files sent to new directory")
+        log.info("Moving files sent to new directory and renaming of %s", shortName)
         for (let certificate of pathOfCertificates) {
             const outputDirectory = `Output/${certificate.Directory}/`;
 
@@ -114,7 +114,6 @@ async function processEntity(entity: PeopleModel) {
                 if (!fs.existsSync(outputDirectory)) {
                     fs.mkdirSync(outputDirectory, {recursive: true})
                 }
-                log.info("Renaming files of %s", shortName);
                 fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
             } catch (e) {
                 log.withError(e).error('Cannot rename the file %s, caused by: ', certificate.Path)
