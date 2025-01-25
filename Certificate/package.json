@@ -2,6 +2,10 @@
   "name": "certificate",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "dev": "bun --env-file=.env run index.ts",
+    "prod": "bun --env-file=.env.production run index.ts"
+  },
   "dependencies": {
     "@react-email/components": "^0.0.15",
     "@react-email/render": "^0.0.12",
