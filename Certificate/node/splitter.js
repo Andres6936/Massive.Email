@@ -8,6 +8,9 @@ import {resolve, basename} from "node:path";
 import {exec} from 'node:child_process';
 import { LogLayer, ConsoleTransport } from 'loglayer'
 import pLimit from 'p-limit'
+import os from 'nodde:os'
+
+const CURRENCY_LIMIT = os.cpus().length;
 
 const log = new LogLayer({
     transport: new ConsoleTransport({
@@ -63,9 +66,9 @@ async function processFile(reader, index, outputDir) {
 const startTime = new Date().getTime();
 
 (async () => {
-    log.info("Start splitting PDF files")
+    log.info(`Start splitting PDF files with ${CURRENCY_LIMIT} cores`)
 
-    const limit = pLimit(5);
+    const limit = pLimit(CURRENCY_LIMIT);
     const promises = []
 
     for await (const file of getFiles('pdf/')) {
