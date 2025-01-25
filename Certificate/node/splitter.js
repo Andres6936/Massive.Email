@@ -8,7 +8,7 @@ import {resolve, basename} from "node:path";
 import {exec} from 'node:child_process';
 import { LogLayer, ConsoleTransport } from 'loglayer'
 import pLimit from 'p-limit'
-import os from 'nodde:os'
+import os from 'node:os'
 
 const CURRENCY_LIMIT = os.cpus().length;
 
