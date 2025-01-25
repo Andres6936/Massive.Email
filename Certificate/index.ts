@@ -135,6 +135,7 @@ do {
         .limit(180)
         .all()
 
+    log.info(`Start splitting PDF files with ${CURRENCY_LIMIT} cores`)
     const limit = pLimit(CURRENCY_LIMIT);
     const promises = []
 
