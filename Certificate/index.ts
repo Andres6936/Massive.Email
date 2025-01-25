@@ -9,12 +9,19 @@ import {Certificates, People, type PeopleModel} from "./schema.ts";
 import fs from "node:fs";
 import pLimit from 'p-limit'
 import os from 'node:os'
+import {ConsoleTransport, LogLayer} from "loglayer";
 
 const CURRENCY_LIMIT = os.cpus().length;
 const YEAR_CERTIFICATES = 2024
 
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
+
+const log = new LogLayer({
+    transport: new ConsoleTransport({
+        logger: console,
+    }),
+})
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -43,7 +50,7 @@ async function sendEmail(to: string, attachments: Attachment[], name: string, mo
         attachments: attachments,
     })
 
-    console.log('Message sent with id: %s and response %s', info.messageId, info.response)
+    log.info('Message sent with id: %s and response %s', info.messageId, info.response)
 
     return {
         MessageId: info.messageId,
@@ -84,10 +91,10 @@ async function processEntity(entity: PeopleModel) {
     ));
 
     try {
-        console.log("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
+        log.info("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
         const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Name!, entity.Month!);
 
-        console.log('Successful sent message, updating register with information of message sent')
+        log.info('Successful sent message, updating register with information of message sent')
         await db.update(People)
             .set({
                 MessageId: responseMailer.MessageId,
@@ -95,7 +102,7 @@ async function processEntity(entity: PeopleModel) {
             })
             .where(eq(People.Serial, entity.Serial));
 
-        console.log("Moving files sent to new directory")
+        log.info("Moving files sent to new directory")
         for (let certificate of pathOfCertificates) {
             const outputDirectory = `Output/${certificate.Directory}/`;
 
@@ -103,10 +110,10 @@ async function processEntity(entity: PeopleModel) {
                 if (!fs.existsSync(outputDirectory)) {
                     fs.mkdirSync(outputDirectory, {recursive: true})
                 }
-                console.log("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
+                log.info("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
                 fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
             } catch (e) {
-                console.error('Cannot rename the file %s, caused by: ', certificate.Path, e)
+                log.withError(e).error('Cannot rename the file %s, caused by: ', certificate.Path)
             }
         }
 
@@ -114,7 +121,7 @@ async function processEntity(entity: PeopleModel) {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
     } catch (e) {
-        console.error('Cannot send email to user (%s) with email: %s, caused by: ', entity.Name, entity.Email, e)
+        log.withError(e).error('Cannot send email to user (%s) with email: %s, caused by: ', entity.Name, entity.Email)
     }
 }
 
