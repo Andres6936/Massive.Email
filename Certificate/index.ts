@@ -77,8 +77,11 @@ do {
             .all()
 
         const pathOfCertificates = directoryAndFiles.map((x, index) => ({
+            // Used for rename the file when the file is sent like attachment
             Name: `${x.Name}-(${index}).pdf`,
+            // Used for load the file from disk
             Path: x.Directory + '/Output' + x.File + '.pdf',
+            // Used for load the file from the directory from disk
             Directory: x.Directory,
         }));
 
