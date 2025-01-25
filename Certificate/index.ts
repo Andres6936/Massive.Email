@@ -86,7 +86,10 @@ async function processEntity(entity: PeopleModel) {
         Directory: x.Directory,
     }));
 
-    log.withContext({T: entity.Name}).info('Loading attachment from path')
+    const [firstName, ...restNames] = entity.Name!.split(' ');
+    const shortName = firstName + ' ' + restNames.at(-1);
+    log.withContext({T: shortName}).info('Loading attachment from path')
+
     const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
         getAttachmentFromPath(x.Name, x.Path)
     ));
