@@ -88,14 +88,14 @@ async function processEntity(entity: PeopleModel) {
 
     const [firstName, ...restNames] = entity.Name!.split(' ');
     const shortName = firstName + ' ' + restNames.at(-1);
-    log.withContext({T: shortName}).info('Loading attachment from path')
+    log.info('Loading attachment from path')
 
     const bufferOfCertificates = await Promise.all(pathOfCertificates.map(x =>
         getAttachmentFromPath(x.Name, x.Path)
     ));
 
     try {
-        log.info("Sending email to (%s) with %s attachments", entity.Name, bufferOfCertificates.length)
+        log.info("Sending email to (%s) with %s attachments", shortName, bufferOfCertificates.length)
         const responseMailer = await sendEmail(entity.Email, bufferOfCertificates, entity.Name!, entity.Month!);
 
         log.info('Successful sent message, updating register with information of message sent')
@@ -114,7 +114,7 @@ async function processEntity(entity: PeopleModel) {
                 if (!fs.existsSync(outputDirectory)) {
                     fs.mkdirSync(outputDirectory, {recursive: true})
                 }
-                log.info("Renaming file %s to %s", certificate.Path, outputDirectory + certificate.Name);
+                log.info("Renaming files of %s", shortName);
                 fs.renameSync(certificate.Path, outputDirectory + certificate.Name.replace('/', '-'));
             } catch (e) {
                 log.withError(e).error('Cannot rename the file %s, caused by: ', certificate.Path)
