@@ -56,7 +56,7 @@ async function processFile(reader, index, outputDir) {
 
         const endTime = new Date().getTime();
         const milliseconds = endTime - startTime;
-        log.info(`The file ${index} was processed in ${milliseconds.toFixed(1)} ms`)
+        log.info(`The page ${index} was processed in ${milliseconds.toFixed(1)} ms`)
 
     } catch (e) {
         log.withError(e).error(`Error processing file ${index}`)
@@ -75,12 +75,12 @@ const startTime = new Date().getTime();
         const basenameOfFile = basename(file).replace('.pdf', '')
         const objDumpOfSeparatedFiles = `obj/${basenameOfFile}`;
 
-        log.withMetadata({T: basenameOfFile}).info('Processing the template file')
+        log.withContext({T: basenameOfFile}).info('Processing the template file')
 
         const reader = muhammara.createReader(file)
         const pages = reader.getPagesCount();
 
-        log.withMetadata({T: basenameOfFile}).info(`The total of pages to splitting is of ${pages}`)
+        log.info(`The total of pages to splitting is of ${pages}`)
 
         fs.mkdirSync(objDumpOfSeparatedFiles, {
             recursive: true
