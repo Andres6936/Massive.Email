@@ -59,7 +59,7 @@ async function processFile(reader, index, outputDir) {
         log.info(`The file ${index} was processed in ${milliseconds.toFixed(1)} ms`)
 
     } catch (e) {
-
+        log.withError(e).error(`Error processing file ${index}`)
     }
 }
 
