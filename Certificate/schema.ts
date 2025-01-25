@@ -10,6 +10,8 @@ export const Certificates = sqliteTable('Certificates', {
     Day: integer('Day'),
 });
 
+export type CertificateModel = typeof Certificates.$inferSelect;
+
 export const People = sqliteTable('People', {
     Serial: integer('Serial').primaryKey({autoIncrement: true}),
     Name: text('Name').notNull(),
@@ -18,3 +20,5 @@ export const People = sqliteTable('People', {
     MessageId: text('MessageId'),
     ResponseMessage: text('ResponseMessage'),
 })
+
+export type PeopleModel = typeof People.$inferSelect;
