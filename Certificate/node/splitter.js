@@ -72,14 +72,15 @@ const startTime = new Date().getTime();
     const promises = []
 
     for await (const file of getFiles('pdf/')) {
-        log.withMetadata({file}).info('Processing the template file')
-
         const basenameOfFile = basename(file).replace('.pdf', '')
         const objDumpOfSeparatedFiles = `obj/${basenameOfFile}`;
 
+        log.withMetadata({T: basenameOfFile}).info('Processing the template file')
+
         const reader = muhammara.createReader(file)
         const pages = reader.getPagesCount();
-        log.withMetadata({file}).info(`The total of pages to splitting is of ${pages}`)
+
+        log.withMetadata({T: basenameOfFile}).info(`The total of pages to splitting is of ${pages}`)
 
         fs.mkdirSync(objDumpOfSeparatedFiles, {
             recursive: true
