@@ -9,6 +9,8 @@ import {Certificates, People} from "./schema.ts";
 import fs from "node:fs";
 import {resolve} from "node:path";
 
+const YEAR_CERTIFICATES = 2024
+
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: 465,
@@ -26,12 +28,12 @@ async function sendEmail(to: string, attachments: Attachment[], name: string, mo
         from: 'logistica@residuosambientales.com',
         to: emails,
         cc: ['logistica@residuosambientales.com', 'atencionalcliente@residuosambientales.com'],
-        subject: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
+        subject: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} ${YEAR_CERTIFICATES} - RE-AM`,
         html: await renderAsync(Email({
-            previewText: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} 2024 - RE-AM`,
+            previewText: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} ${YEAR_CERTIFICATES} - RE-AM`,
             name: name,
             month: month,
-            year: 2024,
+            year: YEAR_CERTIFICATES,
         })),
         attachments: attachments,
     })
