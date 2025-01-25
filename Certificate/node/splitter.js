@@ -58,6 +58,7 @@ const startTime = new Date().getTime();
         })
 
         for (let i = 1; i <= pages; i++) {
+            const startTime = new Date().getTime();
             const outputFilePath = `${objDumpOfSeparatedFiles}/Output${i}-temp.pdf`;
             const compressFilePath = `${objDumpOfSeparatedFiles}/Output${i}.pdf`;
             const writer = muhammara.createWriter(outputFilePath);
@@ -66,11 +67,15 @@ const startTime = new Date().getTime();
 
             await execPromise(`gsc -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${compressFilePath}" ${outputFilePath}`)
             fs.unlinkSync(outputFilePath);
-            log.info(`The file ${i} was processed`)
+
+            const endTime = new Date().getTime();
+            const milliseconds = endTime - startTime;
+            log.info(`The file ${i} was processed in ${milliseconds.toFixed(1)} ms`)
         }
 
         const endTime = new Date().getTime();
-        log.info(`The process took ${(endTime - startTime) / 1000} seconds`)
+        const durationInSeconds = (endTime - startTime) / 1000;
+        log.info(`The process took ${durationInSeconds.toFixed(1)} seconds`)
     }
 })()
 
