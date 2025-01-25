@@ -7,6 +7,7 @@ import {readdir} from 'node:fs/promises'
 import {resolve, basename} from "node:path";
 import {exec} from 'node:child_process';
 import { LogLayer, ConsoleTransport } from 'loglayer'
+import pLimit from 'p-limit'
 
 const log = new LogLayer({
     transport: new ConsoleTransport({
@@ -38,10 +39,34 @@ async function* getFiles(dir) {
     }
 }
 
+async function processFile(reader, index, outputDir) {
+    try {
+        const startTime = new Date().getTime();
+        const outputFilePath = `${outputDir}/Output${index}-temp.pdf`;
+        const compressFilePath = `${outputDir}/Output${index}.pdf`;
+        const writer = muhammara.createWriter(outputFilePath);
+        writer.createPDFCopyingContext(reader).appendPDFPageFromPDF(index - 1);
+        writer.end();
+
+        await execPromise(`gsc -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${compressFilePath}" ${outputFilePath}`)
+        fs.unlinkSync(outputFilePath);
+
+        const endTime = new Date().getTime();
+        const milliseconds = endTime - startTime;
+        log.info(`The file ${index} was processed in ${milliseconds.toFixed(1)} ms`)
+
+    } catch (e) {
+
+    }
+}
+
 const startTime = new Date().getTime();
 
 (async () => {
     log.info("Start splitting PDF files")
+
+    const limit = pLimit(5);
+    const promises = []
 
     for await (const file of getFiles('pdf/')) {
         log.withMetadata({file}).info('Processing the template file')
@@ -58,20 +83,10 @@ const startTime = new Date().getTime();
         })
 
         for (let i = 1; i <= pages; i++) {
-            const startTime = new Date().getTime();
-            const outputFilePath = `${objDumpOfSeparatedFiles}/Output${i}-temp.pdf`;
-            const compressFilePath = `${objDumpOfSeparatedFiles}/Output${i}.pdf`;
-            const writer = muhammara.createWriter(outputFilePath);
-            writer.createPDFCopyingContext(reader).appendPDFPageFromPDF(i - 1);
-            writer.end();
-
-            await execPromise(`gsc -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${compressFilePath}" ${outputFilePath}`)
-            fs.unlinkSync(outputFilePath);
-
-            const endTime = new Date().getTime();
-            const milliseconds = endTime - startTime;
-            log.info(`The file ${i} was processed in ${milliseconds.toFixed(1)} ms`)
+            promises.push(limit(() => processFile(reader, i, objDumpOfSeparatedFiles)))
         }
+
+        await Promise.all(promises)
 
         const endTime = new Date().getTime();
         const durationInSeconds = (endTime - startTime) / 1000;
