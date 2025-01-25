@@ -43,15 +43,14 @@ async function* getFiles(dir) {
     log.info("Start splitting PDF files")
 
     for await (const file of getFiles('pdf/')) {
-        log.withContext({file})
-        log.info('Processing the template file')
+        log.withMetadata({file}).info('Processing the template file')
 
         const basenameOfFile = basename(file).replace('.pdf', '')
         const objDumpOfSeparatedFiles = `obj/${basenameOfFile}`;
 
         const reader = muhammara.createReader(file)
         const pages = reader.getPagesCount();
-        log.info(`The total of pages to splitting is of ${pages}`)
+        log.withMetadata({file}).info(`The total of pages to splitting is of ${pages}`)
 
         fs.mkdirSync(objDumpOfSeparatedFiles, {
             recursive: true
@@ -66,6 +65,7 @@ async function* getFiles(dir) {
 
             await execPromise(`gsc -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${compressFilePath}" ${outputFilePath}`)
             fs.unlinkSync(outputFilePath);
+            log.info(`The file ${i} was processed`)
         }
     }
 })()
