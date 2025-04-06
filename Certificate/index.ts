@@ -14,7 +14,7 @@ import {ConsoleTransport, LogLayer} from "loglayer";
 const DELIMITER_EMAIL = ';'
 const LIMIT_EMAILS_TO_SEND = 180;
 const CURRENCY_LIMIT = os.cpus().length;
-const YEAR_CERTIFICATES = 2024
+const YEAR_CERTIFICATES = 2025
 
 const sqlite = new Database('../Certificates.sqlite');
 const db = drizzle(sqlite);
