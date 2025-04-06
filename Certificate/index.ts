@@ -11,6 +11,8 @@ import pLimit from 'p-limit'
 import os from 'node:os'
 import {ConsoleTransport, LogLayer} from "loglayer";
 
+const DELIMITER_EMAIL = ';'
+const LIMIT_EMAILS_TO_SEND = 180;
 const CURRENCY_LIMIT = os.cpus().length;
 const YEAR_CERTIFICATES = 2024
 
@@ -34,12 +36,12 @@ const transporter = nodemailer.createTransport({
 })
 
 async function sendEmail(to: string, attachments: Attachment[], name: string, month: string) {
-    const emails = to.split(';')
+    const emails = to.split(DELIMITER_EMAIL)
 
     const info = await transporter.sendMail({
         from: 'logistica@residuosambientales.com',
         to: emails,
-        cc: ['logistica@residuosambientales.com', 'atencionalcliente@residuosambientales.com'],
+        cc: ['atencionalcliente@residuosambientales.com'],
         subject: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} ${YEAR_CERTIFICATES} - RE-AM`,
         html: await renderAsync(Email({
             previewText: `CERTIFICADOS DE DISPOSICIÓN FINAL - ${month} ${YEAR_CERTIFICATES} - RE-AM`,
@@ -128,22 +130,32 @@ async function processEntity(entity: PeopleModel) {
     }
 }
 
+let isRunning = true;
+let amountEmailsToSent = 0;
 
-let entitiesToSendEmails;
-
-do {
-    entitiesToSendEmails = db.select()
-        .from(People)
-        .where(isNull(People.MessageId))
-        .limit(180)
-        .all()
-
+while (isRunning) {
     log.info(`Start splitting PDF files with ${CURRENCY_LIMIT} cores`)
     const limit = pLimit(CURRENCY_LIMIT);
     const promises = []
 
-    for (let entity of entitiesToSendEmails) {
-        promises.push(limit(() => processEntity(entity)));
+    const entitiesToSendEmails = db.select()
+        .from(People)
+        .where(isNull(People.MessageId))
+        .all()
+
+    while (amountEmailsToSent <= LIMIT_EMAILS_TO_SEND) {
+        const entity = entitiesToSendEmails.shift()
+        if (entity ) {
+            promises.push(limit(() => processEntity(entity)));
+            const amountOfEmails = entity.Email.split(DELIMITER_EMAIL).length;
+            // Sum the total of emails to send more 1 for the CC
+            amountEmailsToSent += amountOfEmails + 1;
+            log.info(`The total of emails to send is of ${amountEmailsToSent + 1}`)
+        } else {
+            // The array is empty, exit of while
+            log.info(`The array is empty, exit of while`)
+            break;
+        }
     }
 
     log.info(`Start to dispatch all process with ${promises.length} promises`)
@@ -152,4 +164,4 @@ do {
     log.info('End of the process, waiting for 1 hour to start again')
     // Wait for 1 hour
     await new Promise(resolve => setTimeout(resolve, 3_600_000));
-} while (entitiesToSendEmails.length >= 0);
+}
