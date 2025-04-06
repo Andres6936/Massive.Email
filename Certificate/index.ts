@@ -146,8 +146,10 @@ do {
         promises.push(limit(() => processEntity(entity)));
     }
 
+    log.info(`Start to dispatch all process with ${promises.length} promises`)
     await Promise.all(promises);
 
+    log.info('End of the process, waiting for 1 hour to start again')
     // Wait for 1 hour
     await new Promise(resolve => setTimeout(resolve, 3_600_000));
 } while (entitiesToSendEmails.length >= 0);
