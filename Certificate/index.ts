@@ -166,6 +166,8 @@ while (isRunning) {
         isRunning = false;
     } else {
 
+        // Reset the counter
+        amountEmailsToSent = 0;
         log.info('End of the process, waiting for 1 hour to start again')
         // Wait for 1 hour
         await new Promise(resolve => setTimeout(resolve, 3_600_000));
