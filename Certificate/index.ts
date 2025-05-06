@@ -170,6 +170,22 @@ while (isRunning) {
         amountEmailsToSent = 0;
         log.info('End of the process, waiting for 1 hour to start again')
         // Wait for 1 hour
-        await new Promise(resolve => setTimeout(resolve, 3_600_000));
+        await new Promise(resolve => {
+            let remainingSeconds = 3600; // 1 hour in seconds
+            const timer = setInterval(() => {
+                const minutes = Math.floor((remainingSeconds % 3600) / 60);
+                const seconds = remainingSeconds % 60;
+
+                process.stdout.write(`\rWaiting: ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`);
+
+                remainingSeconds--;
+
+                if (remainingSeconds < 0) {
+                    clearInterval(timer);
+                    console.log('\nResuming operations...');
+                    resolve(void 0);
+                }
+            }, 1000);
+        });
     }
 }
